@@ -1,0 +1,22 @@
+---
+title: docker部署记录文件
+date: 2018-12-09 10:33:09
+tags: dcoker
+categories: docker
+---
+docker部署记录
+
+1.文件位置 /var/www/powerpred    
+
+2.收集静态文件位置 /var/www/static
+
+3.80占用? netstat -ano | grep 80找到，kill掉pid
+4 进入container 
+```
+docker run -it -p 80:80 test:v4
+```
+进入到相应的web目录
+```
+python3 manage.py runserver 0.0.0.0:8000
+```
+ok，此时可以访问。

@@ -1,0 +1,242 @@
+---
+title: es6的promise函数
+date: 2018-12-18 10:33:09
+tags: javascript
+categories: javascript
+---
+
+## <center>promise</center>
+promise是异步编程的一种解决方案，比起传统的解决方案--回调函数和事件更合理和强大。    
+所谓promise，简单的说是一个容器，里面保存着未来才会结束的事件(通常是一个异步操作)    
+promise的特点:
+- 对象的状态不受外界影响，promise对象代表一个异步操作，有三种状态:pending(进行中),fulfilled(已成功),rejected(已失效)。只有异步操作的结果可以决定当前是哪一种状态，任何其他操作无法改变这个状态。这也是promise的由来。
+- 一旦状态改变，就不会再变，任何时候都可以得到这个结果，promise对象的状态改变，只有两种可能：从pending变为fulfilled和从pending变成rejected。只要这两种状态发生，状态就凝固了，不会再变了，会一直保持这个结果，这个结果就成为resolved(已定型)。如果改变已经发生了，你在对promise添加回调函数，也会立即得到这个结果。这与事件Event不同，事件的特点是如果你错过了它，再去监听，是得不到结果的。
+- promise也有一些缺点，首先取消promise，一旦建立就会立即执行，无法中途取消，其次如果不设置回调函数，promise内部抛出的错误不会反映到外部，第三，当初与oending状态，无法得知目前处于哪一个阶段(刚刚开始还是即将完成)
+
+### 基本用法
+```
+const promise = new Promise(function(resolve, reject){
+    //...some code
+    if(/* 异步操作成功 */){
+        resolve(value)
+    } else {
+        reject(error)
+    }
+})
+```
+resolve的作用是，将promise的对象从状态pending变为resolved，在异步操作成功时候调用，并将异步操作的结果作为参数传递出去；reject的作用是，再promise的状态由pending变为rejectd，在异步操作失败时候调用，并将异步操作的报出的错误，作为参数传递出去。   
+promise实例生成以后，可以用then方法分别指定resolved和rejected状态的回调函数。    
+```
+promise.then(function(value){
+    //success
+    },function(error){
+    //failure
+    })
+```
+promise实例生成以后，可以接受两个回调函数作为参数，第一个回调函数是promise对象变为resolved时候调用，第二个是回调函数是promise变为reject时调用，第二个函数是可选的的，二者均接受promise对象传出的值作为参数。    
+例子：
+```
+function timeout(ms){
+    return new Promise((resolve, reject) => {
+        setTimeout(resolve, ms, 'done')
+    });
+}
+timeout(100).then((value) => {
+    console.log(value)
+})
+```
+上述代码中timeout方法返回了一个promise实例，表示一段时间才会发生的结果，过了指定的时间，promise的实例状态变为resolved，就会触发then方法绑定的回调函数。
+继续举例
+```
+let promise = new Promise((resolve, reject) => {
+    console.log('promise');
+    resolve();
+})
+promise.then(function() {
+    console.log('resolved')
+})
+console.log('xxxx')
+输出结果:
+// promise
+// xxxx
+// resolved
+```
+上述代码中，promise建立后立即执行，首先输出promise，然后，.then方法指定的回调函数，将在当前脚本所有的同步任务执行完才会执行，所以resolved最后输出。
+继续举例：
+```
+function loadImage(url){
+    retutn new Promise(function(resolve, reject) {
+        const image = new Image();
+        image.onload = function() {
+            resolve(image)
+        }
+        image.onerror = function() {
+            reject(new Error('could not load image at' + url))
+        }
+        image.src = url
+    })
+}
+```
+异步加载图片，如果加载成功，则调用resolve方法，否则调用reject方法
+
+多个promise的实例：
+```
+const p1 = new Promise(function(resolve, reject) {
+    setTimeout(()=>{
+        reject(new Error('fail'), 3000)
+    })
+})
+const p2 = new Promise(function(resolve, reject) {
+    setTimeout(() => {
+        resolve(p1), 1000
+    })
+})
+p2.then(result => console.log(result))
+    .catch(error => console.log(error))
+//Error: fail
+```
+### .then方法，链式调用
+```
+getJson("/posts.json").then(
+    post => getJson(post.commentURL)
+).then(
+    comments => console.log('resolved:',comments)
+    err => console.log('reject:',err)
+)
+```
+上面是链式调用，从/post.json获取数据，成功后再用getJosn函数获取comment的url传入第二个.then作为参数，成功则打印评论，失误则打印错误。一般来说用catch方法捕获错误。
+```
+const promise = new Promise(function(resolve, reject) {
+    throw new Error('test')
+})
+promise.catch((error) => {
+    console.log(error)
+})
+```
+promise会吃掉内部的错误，例子如下：
+```
+const someAsyncThing = function() {
+    return new Promise((resolve, reject) => {
+        //这里x并没有定义
+        resolve (x+2)
+    })
+}
+someAsyncThing()
+.catch( (error) => {
+    console.log(error)
+})
+.then(() => {
+    console.log('carry on')
+})
+//ReferenceError: x is not defined
+    at Promise (<anonymous>:4:18)
+    at new Promise (<anonymous>)
+    at someAsyncThing (<anonymous>:2:12)
+    at <anonymous>:7:1
+VM193:12 carry on
+```
+这里在X没有定义的情况下，首先捕捉了错误，即使x未定义仍然运行.then函数输出了carry on 
+
+
+### Promise.finally
+finally 指定不敢Pormise的对象最后的结果如何，都会执行的操作
+```
+promise
+.then(result => {..})
+.catch(result => {...})
+.finally(result => {...})
+```
+
+### Promise.all
+promise.all方法讲对个promise实例，包装成一个promise实例。
+```
+const p = Promise.all([p1, p2, p3])
+```
+上面代码中，promise会接受一个数组作为参数，p1, p2, p3都是Promise的实例，promise.all的参数可以不是数组，但必须具有Iterator接口，且返回的每个成员都是Promise的实例。
+p的状态有p1,p2,p3确定：    
+- 只有p1, p2, p3的状态都变成fulfilled，p的状态才会变成fulfilled，此时p1, p2, p3的返回值组成一个数组，作为参数传递给p的回调函数。
+- 只要p1, p2, p3有一个被reject，p的状态则变为reject，此时第一个被reject的返回值会作为参数，传递给p的回调函数。
+具体例子如下：
+```
+//这里并不觉得是6个promise的实例
+const promises = [2,3,5,6,11,13].map(function(id) {
+    return getJson('/post/' + id + '.json')
+})
+Promise.all(promises).then( (posts) => {
+    .....
+}).catch((error) => {
+    .....
+})
+
+```
+再举个栗子更好理解的:
+```
+const databasePromise = connectDatabase();
+const booksPromise = databasePromise
+    ,then(findAllBook)
+const userPromise = databasePromise
+    .then(getCurrentUser)
+Promise.all([bookPromise, userPromise])
+    .then(([book, user]) => {
+        pickTopRecommentaction(book, user)
+    })
+```
+这里，bookPromise和userPromise是两个异步操作，只有等到他们的结果都返回了，才会去执行pickTopRecommentaction这个回调函数。需要注意的如果作为参数的promise的实例被reject了，那么不会触发Promise.all的catch方法。
+例子：
+```
+const p1 = new Promise((resolve, reject) => {
+  resolve('hello');
+})
+.then(result => result)
+.catch(e => e);
+
+const p2 = new Promise((resolve, reject) => {
+  throw new Error('报错了');
+})
+.then(result => result)
+.catch(e => e);
+
+Promise.all([p1, p2])
+.then(result => console.log(result))
+.catch(e => console.log(e));
+// ["hello", Error: 报错了]
+```
+上面代码中，p1会resolved，p2首先会rejected，但是p2有自己的catch方法，该方法返回的是一个新的 Promise 实例，p2指向的实际上是这个实例。该实例执行完catch方法后，也会变成resolved，导致Promise.all()方法参数里面的两个实例都会resolved，因此会调用then方法指定的回调函数，而不会调用catch方法指定的回调函数。    
+若p2未定义catch方法：
+```
+const p1 = new Promise((resolve, reject) => {
+  resolve('hello');
+})
+.then(result => result);
+
+const p2 = new Promise((resolve, reject) => {
+  throw new Error('报错了');
+})
+.then(result => result);
+
+Promise.all([p1, p2])
+.then(result => console.log(result))
+.catch(e => console.log(e));
+// Error: 报错了
+```
+首先，p2会reject，所以reject的返回值会作为参数给Promise.all，同事调用Promise.all的catch方法。
+
+### Promise.race
+const p = Promise.race([p1, p2, p3])
+上面代码中，只要p1、p2、p3之中有一个实例率先改变状态，p的状态就跟着改变。那个率先改变的 Promise 实例的返回值，就传递给p的回调函数。
+
+Promise.race方法的参数与Promise.all方法一样，如果不是 Promise 实例，就会先调用下面讲到的Promise.resolve方法，将参数转为 Promise 实例，再进一步处理。
+
+下面是一个例子，如果指定时间内没有获得结果，就将 Promise 的状态变为reject，否则变为resolve。
+```
+const p = Promise.race([
+  fetch('/resource-that-may-take-a-while'),
+  new Promise(function (resolve, reject) {
+    setTimeout(() => reject(new Error('request timeout')), 5000)
+  })
+]);
+
+p
+.then(console.log)
+.catch(console.error);
+```

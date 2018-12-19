@@ -1,0 +1,58 @@
+---
+title: es6的函数
+date: 2018-12-12 10:33:09
+tags: javascript
+categories: javascript
+---
+## <center>es6函数</center>
+### 1.函数的默认值
+```
+function log(x, y) {
+    y = y ||　'world';
+    console.log(x, y)
+}
+log('Hello');   //Hello world
+log('Hello', 'world');      //Hello World
+log('hello','') //Hello world
+```
+上述缺点，在检查函数`log`的参数ｙ没有赋值，没有的话指定为world，缺点是y赋值false,就会像最后一个即使赋值为空，那么也会显示world．
+
+es6可以为参数设置默认值:
+```
+function log(x, y='world') {
+    this.x = x;
+    this.y = y;
+}
+log('Hello');   //Hello world
+log('Hello', 'world');      //Hello World
+log('hello','') //Hello world
+```
+此外，参数变量是默认声明的，函数体内无法用let或const再次声明，否则报错.    
+
+### 2.与结构赋值相结合    
+```
+function foo({x ,y = 5}) {
+    console.log(x,y)
+}
+foo({});    //undefined 5
+foo({x: 1});    //1 5
+foo({x: 1 ,y: 2});  1 2
+foo()；  // x of undefined
+```
+最后一个没有为foo提供参数,所以为undefined.
+另一个例子:
+```
+function fetch(url, {body='', method='GET', header= {} }){
+    console.log(method);
+}
+fetch ('http://example.com', {}); //"GET"
+fetch ('http://example.com'); //报错
+
+function fetch(url, {body='', method='GET', header= {}= {} }){
+    console.log(method);
+}
+//没有第二个参数,默认值会生效
+fetch ('http://example.com'); //"GET"
+```
+
+
