@@ -10,7 +10,7 @@ categories: socket
 python提供了两个基本的socket模块:
 - Socket 它提供了标准的BSD Socket API.
 - SocketServer 它提供了服务器重心，可以简化网络服务的开发。
-
+<!--more -->
 ### Socker类型
  - socket.AF_UNIX: 用于同一台机器上的进程通讯(即本机通讯)
  - socket.AF_INET: 用于服务器与服务器之间的网络通讯

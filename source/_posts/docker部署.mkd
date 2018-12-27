@@ -5,7 +5,6 @@ tags: dcoker
 categories: docker
 ---
 docker部署记录
-
 1.文件位置 /var/www/powerpred    
 
 2.收集静态文件位置 /var/www/static

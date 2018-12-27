@@ -28,7 +28,7 @@ log('Hello', 'world');      //Hello World
 log('hello','') //Hello world
 ```
 此外，参数变量是默认声明的，函数体内无法用let或const再次声明，否则报错.    
-
+<!--more -->
 ### 2.与结构赋值相结合    
 ```
 function foo({x ,y = 5}) {

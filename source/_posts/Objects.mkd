@@ -32,7 +32,7 @@ f(1, 2) // Object {x :1, y:2}
     hello() {console.log('我的名字是:', this.name)}
  }
  ```
- 
+<!--more -->
  ####2.属性名表达式    
  - 例一
 

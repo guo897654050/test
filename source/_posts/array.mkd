@@ -29,6 +29,7 @@ Array.prototype.push.apply(arr1, arr2)
 ES6: arr1.push(...arr2)
 ```
 - 扩展运算符的应用    
+<!--more -->
 1.复制数组
 
 ```

@@ -22,6 +22,7 @@ fruits.prototype = {
 var apple = new fruits;
 apple.say();    //My color is red
 ```
+<!-- more -->
 但是如果我们有一个对象banana= {color : "yellow"} ,我们不想对它重新定义 say 方法，那么我们可以通过 call 或 apply 用 apple 的 say 方法：
 ```
 banana = {
