@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="redis,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="redis事务为了保证数据的正确性，确认一点:在多个客户端同时处理相同的数据时候，不谨慎的操作会导致数据出错。下面介绍使用redis事务来防止数据出错的方法，以及事务来提升性能的方法。redis的事务和传统关系数据库事务并不同，在传统关系数据库中，用户先向数据库服务器发送BEGIN，然后执行各个相互一致(consistent)的写操作和读操作，最后用户选择COMMIT来确认之前所做的更改，或者发送">
+<meta name="keywords" content="redis">
+<meta property="og:type" content="article">
+<meta property="og:title" content="redis事务2">
+<meta property="og:url" content="http://windystreet.net/2019/02/25/redis事务2/index.html">
+<meta property="og:site_name" content="风居住的街道">
+<meta property="og:description" content="redis事务为了保证数据的正确性，确认一点:在多个客户端同时处理相同的数据时候，不谨慎的操作会导致数据出错。下面介绍使用redis事务来防止数据出错的方法，以及事务来提升性能的方法。redis的事务和传统关系数据库事务并不同，在传统关系数据库中，用户先向数据库服务器发送BEGIN，然后执行各个相互一致(consistent)的写操作和读操作，最后用户选择COMMIT来确认之前所做的更改，或者发送">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://windystreet.net/images/redis-transcation1.bmp">
+<meta property="og:image" content="http://windystreet.net/images/redis-transcation2.bmp">
+<meta property="og:updated_time" content="2019-03-02T02:59:39.578Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="redis事务2">
+<meta name="twitter:description" content="redis事务为了保证数据的正确性，确认一点:在多个客户端同时处理相同的数据时候，不谨慎的操作会导致数据出错。下面介绍使用redis事务来防止数据出错的方法，以及事务来提升性能的方法。redis的事务和传统关系数据库事务并不同，在传统关系数据库中，用户先向数据库服务器发送BEGIN，然后执行各个相互一致(consistent)的写操作和读操作，最后用户选择COMMIT来确认之前所做的更改，或者发送">
+<meta name="twitter:image" content="http://windystreet.net/images/redis-transcation1.bmp">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://windystreet.net/2019/02/25/redis事务2/">
+
+
+
+
+
+  <title>redis事务2 | 风居住的街道</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">风居住的街道</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://windystreet.net/2019/02/25/redis事务2/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="大长腿鲁班">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="风居住的街道">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">redis事务2</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-02-25T22:39:06+08:00">
+                19-02-25 22:39
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
+                  <a href="/categories/redis/" itemprop="url" rel="index">
+                    <span itemprop="name">redis</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/02/25/redis事务2/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2019/02/25/redis事务2/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="redis事务"><a href="#redis事务" class="headerlink" title="redis事务"></a>redis事务</h3><p>为了保证数据的正确性，确认一点:在多个客户端同时处理相同的数据时候，不谨慎的操作会导致数据出错。下面介绍使用redis事务来防止数据出错的方法，以及事务来提升性能的方法。<br>redis的事务和传统关系数据库事务并不同，在传统关系数据库中，用户先向数据库服务器发送BEGIN，然后执行各个相互一致(consistent)的写操作和读操作，最后用户选择COMMIT来确认之前所做的更改，或者发送ROLLBACK来放弃修改。<br>在redis也可一处理一连串相互一致的读操作和写操作。redis的事务以MULTI开始，之后跟着用户传入的多个命令，最后以EXEC为结束。但是这种简单的操作在调用EXEC命令之前不会执行任何实际的操作，所以用户没办法根据读到的数据做决定。<br>以例子来说明。下图展示了游戏中用于表示用户信息和用户包裹的结构，用户信息存储在散列用户报国使用一个集合来表示。<br><a id="more"></a></p>
+<div style="width: 200px; margin: auto"><img src="/images/redis-transcation1.bmp" alt="示例图片"></div>
+
+<p>买卖市场的需求:一个用户(卖家)可以将商品放到市场上进行销售，当一个用户(买家)购买时，卖家会收到钱。为了将被销售商品的全部信息存储到市场里面，我们将会把商品id和卖家id拼接在一起，并将拼接结果作为成员存储到市场的有序集合如下图所示</p>
+<div style="width: 200px; margin: auto"><img src="/images/redis-transcation2.bmp" alt="示例图片"></div>
+
+<h4 id="将商品放到市场上销售"><a href="#将商品放到市场上销售" class="headerlink" title="将商品放到市场上销售"></a>将商品放到市场上销售</h4><p>为了将商品放到市场上销售，程序出了用到MULTI和EXEC命令之外，需要配合使用WATCH命令，有时甚至会用到UNWATCH和DISCARD(丢弃)。在用户使用WATCH对键进行监听后，直到用户执行EXEC这段时间里，如果有其他的客户端抢险对任何被监视的键进行了替换，更新，删除等操作，那么当用户尝试执行EXEC命令的时候。事务失败并返回一个错误(之后用户可以选择重试事务或者放弃事务)。通过使用WATCH，MULTI/EXEC，UNWATCH/DISCARD等命令，程序可以在执行某些重要操作的时候。通过确保自己正在使用的数据没有发生变化来避免出错。<br>什么是DISCARD？ unwatch命令可以再WATCH命令之后，在MULTI命令执行之前进行重置(reset)。同样DISCARD命令也可以在MULTI命令执行之后，在EXEC执行之前对连接进行重置。这也意味着，用户在使用WATCH监视一个键或者多个键，接着使用MULTI开始一个新的事务，并将多个命令入队到事务队列之后，仍然可以通过发送DISCARD命令来取消WATCH命令并清空所有已经已经入队的命令。</p>
+<p>在讲一件商品放到市场上机型销售的时候，程序需要将被销售的商品添加到记录市场正在销售商品的有序集合里面，并且再添加操作执行的过程中，监视卖家的包裹以确保被销售的商品确实存在u卖家的包裹当中。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">def list_item(conn, itemid, sellerid, pric):</span><br><span class="line">    inventory = &quot;inventory:%s&quot;%sellerid #包裹的集合</span><br><span class="line">    item = &quot;%s.%s&quot;%(itemid, sellerid) </span><br><span class="line">    end = time.time() + 5</span><br><span class="line">    pipe = conn.pipeline()</span><br><span class="line">    while time.time() &lt; end:</span><br><span class="line">        try:</span><br><span class="line">            pipe.watch(inventory)  #监视用户的包裹</span><br><span class="line">            if not pipe.sismember(inventory, itemid) #检查用户是否仍然持有被销售的产品</span><br><span class="line">                pipe.unwatch(inventory)  #没有的话，取消监视并返回空</span><br><span class="line">                return None</span><br><span class="line">            pipe.multi()</span><br><span class="line">            pipe.zadd(&quot;market:&quot;, item, price)  #把被销售的产品添加到市场中</span><br><span class="line">            pipe.srem(&quot;inventory&quot;, itemid)</span><br><span class="line">            pipe.execute()</span><br><span class="line">            return None</span><br><span class="line">        except redis.exceptions.WatchError:</span><br><span class="line">            pass</span><br><span class="line">    return None</span><br></pre></td></tr></table></figure></p>
+<p>list_item()函数，首先执行一些初始化，然后对卖家的包裹进行监视，验证卖家的商品是否处于卖家的包裹中，如果是，函数就会把商品添加到市场，并从卖家包裹移除这个商品，，在使用watch对包裹进行监视的过程中，如果包裹被更新或修改，程序受到错误并进行重试。</p>
+<h4 id="购买商品"><a href="#购买商品" class="headerlink" title="购买商品"></a>购买商品</h4><p>首先对市场以及卖家的信息进行监控，获取买家的钱数以及商品的售价，并检查钱够不够。不够，取消事务。够的话，先把买家的钱转给卖家，然后将售出的商品移动至买家的包裹，并将该商品从市场中移除。当买家的个人信息或者市场的商品信息变动，返回错误，最大重试时间10s<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">def purchase_item(conn, buyerid, itemid, sellerid, lprice):</span><br><span class="line">    buyer = &quot;users:%s&quot; %buyerid</span><br><span class="line">    seller = &quot;users:%s&quot; %sellerid</span><br><span class="line">    item = &quot;%s.%s&quot; %(itemid, sellerid)</span><br><span class="line">    inventory = &quot;inventory:%s&quot; %buyerid</span><br><span class="line">    end = time.time() + 10</span><br><span class="line">    pipe = conn.pipeline()</span><br><span class="line">    </span><br><span class="line">    while time.time() &lt; end + 10:</span><br><span class="line">        try:</span><br><span class="line">            pipe.watch(&quot;market:&quot;, buyer)　　#监视两个，一个market,一个购买者的信息</span><br><span class="line">            </span><br><span class="line">            price = pipe.zscore(&quot;market:&quot;, item)</span><br><span class="line">            funds = int(pipe.hget(buyer, &quot;funds&quot;))</span><br><span class="line">            if price != lprice or price &gt; funds:  #检查买家购买的商品的价格是否发生变化及用户是否有钱购买</span><br><span class="line">                pipe.unwatch()</span><br><span class="line">                return None</span><br><span class="line">            pipe.multi()</span><br><span class="line">            pipe.hincrby(seller, &quot;funds&quot;, int(price))</span><br><span class="line">            pipre.hincrby(buyer, &quot;funds&quot;, int(-price))</span><br><span class="line">            pipe.sadd(inventory, itemid)</span><br><span class="line">            pipe.zrem(&quot;market:&quot;, item)</span><br><span class="line">            pipe.excute()</span><br><span class="line">            reutrn True</span><br><span class="line">            </span><br><span class="line">        except redis.exceptions.WatchError:</span><br><span class="line">            pass</span><br><span class="line">    return False</span><br></pre></td></tr></table></figure></p>
+<p>补充:为什么ｒｅｄｉｓ没有实现典型的加锁功能？　　　　<br>在访问以写入为目的数据的时候，关系库会对被访问的数据进行加锁，直到事务被提交或者回滚。如果其他用户尝试对被加锁的数据进行写入，该客户端将会被阻塞。直到第一个事务执行完，持有锁的可花旦越慢，等待时间越长。　　　　<br>为了减少等待时间，redis并不会在watch的时候对数据进行加锁，知乎自爱数据被其他客户端抢先修改的情况下通知执行了watch的客户端，这种做法成为乐观锁，而关系数据库的称为悲观锁。乐观锁在实际中也有效，因为客户端永远不必花时间去等待第一个已经取得锁的用户，只需要在自己的事务中失败并且重试即可。</p>
+<h3 id="非事务性流水线操作"><a href="#非事务性流水线操作" class="headerlink" title="非事务性流水线操作"></a>非事务性流水线操作</h3><p>事务性质-被，multi和exec包裹的命令在执行时候不会被其他客户端打扰。<br>在需要执行大量命令的情况下，及时命令不需要放在事务中执行，单位了一次发送所有的命令来减少通信次数，用户也可能吧命令包裹在multi和exec之间。但是multi和exec也会消耗资源，可能导致其他命令延迟执行。</p>
+<p>pipe = conn.pipeline()</p>
+<p>如果用户在执行pipeline()传入True作为参数，或者不传，客户端将使用multi和exec包裹命令。如果传入Flase作为参数，同样客户端会想执行事务那样收集用户所需的所有命令，只是不再用multi和exec包裹命令。如果用户需要向redis一次发送多个命令，且对这些命令来说，一个命令的执行结果不影响另一个命令的输入，且这些命令需要以事务方式执行，可通过piepeline()传入fasle来提升redis的性能。</p>
+<p>之前的例子update_token函数，负责记录用户最近浏览的商品记忆访问过的页面，并跟新用户的cookie，每次执行都会调用2-5个redis命令，是的客户端和redis产生2-5次通信往返。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">def update_token(conn, token, user, item=None):</span><br><span class="line">    #获取时间戳</span><br><span class="line">    timestamp = time.time()</span><br><span class="line">    #维持令牌与已经登录的用户的映射</span><br><span class="line">    conn.hset(&apos;login:&apos;, token, user)</span><br><span class="line">    #记录令牌最后一次出现的时间</span><br><span class="line">    conn.zadd(&apos;recent:&apos;, token, timestamp)</span><br><span class="line">    if item:</span><br><span class="line">        #记录用户浏览过的商品</span><br><span class="line">        conn.zadd(&apos;viewed:&apos; + token, item, timestamp)</span><br><span class="line">        #移除旧的记录，只保留过去的25个商品,移除0 - -26区间的成员，0和-26都是闭区间</span><br><span class="line">        conn.zremrangebyrank(&apos;viewed:&apos; + token, 0 , -26)</span><br><span class="line">        #新增,zincrby key -5 member 让member的score减去5，每次减去-1，若key不存在，相当于zadd key increament member</span><br><span class="line">        #浏览单最多的商品将排列在索引0的位置上</span><br><span class="line">        conn.zincrby(&apos;viewed:&apos;, item, -1)</span><br></pre></td></tr></table></figure></p>
+<p>流水线<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">def update_token_pipeline(conn, toekn, user, item=None):</span><br><span class="line">    timestamp = time.time()</span><br><span class="line">    pipe = conn.pipeline(False)</span><br><span class="line">    pipe.hset(&apos;login:&apos;, token, user)</span><br><span class="line">    pipe.zadd(&apos;recent&apos;, token, timestamp)</span><br><span class="line">    if item:</span><br><span class="line">        pipe.zadd(&apos;viewed:&apos; + token, item, timestamp)</span><br><span class="line">        pipe.zremrangebyrank(&apos;viewed:&apos; + token, 0， -26)</span><br><span class="line">        pipe.zincr(&apos;viewed:&apos;, item, -1)</span><br><span class="line">    pipe.execute()</span><br></pre></td></tr></table></figure></p>
+<p>减少了通信往返次数，提升了redis性能，</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/redis/" rel="tag"># redis</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/02/25/redis持久化/" rel="next" title="redis持久化">
+                <i class="fa fa-chevron-left"></i> redis持久化
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="大长腿鲁班">
+            
+              <p class="site-author-name" itemprop="name">大长腿鲁班</p>
+              <p class="site-description motion-element" itemprop="description">悠悠苍天，何薄于我 -诸葛</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">21</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/guo897654050" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://weibo.com/u/5021302462" target="_blank" title="微博">
+                      
+                        <i class="fa fa-fw fa-weibo"></i>微博</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#redis事务"><span class="nav-number">1.</span> <span class="nav-text">redis事务</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#将商品放到市场上销售"><span class="nav-number">1.1.</span> <span class="nav-text">将商品放到市场上销售</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#购买商品"><span class="nav-number">1.2.</span> <span class="nav-text">购买商品</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#非事务性流水线操作"><span class="nav-number">2.</span> <span class="nav-text">非事务性流水线操作</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">大长腿鲁班</span>
+
+  
+</div>
+
+
+<div class="powered-by">
+<i class="fa fa-user-md"></i><span id="busuanzi_container_site_uv">
+  本站访客数:<span id="busuanzi_value_site_uv"></span>
+</span>
+</div>
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'kgXwARBSb6kIcni5deGNp1zl-gzGzoHsz',
+        appKey: 'yWBy1sXSK5yTTOI9YYw54UB5',
+        placeholder: '填写下你的心得吧',
+        avatar:'retro',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

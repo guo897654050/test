@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="python,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="进程与线程的关系线程是属于进程的，线程运行在进程空间内，同一进程所产生的线程共享同一内存空间，当进程退出时，该进程所产生的所有线程都会被强制清除并且退出。。线程可与属于同一进程的其他线程共享进程的全部资源。 python的线程Threading用于提供线程相关的操作，线程是应用程序中的最小单元。 1.threading模块threading模块是对thread模块的二次封装，提供了更方便的api来">
+<meta name="keywords" content="python">
+<meta property="og:type" content="article">
+<meta property="og:title" content="python线程">
+<meta property="og:url" content="http://windystreet.net/2019/01/16/python线程/index.html">
+<meta property="og:site_name" content="风居住的街道">
+<meta property="og:description" content="进程与线程的关系线程是属于进程的，线程运行在进程空间内，同一进程所产生的线程共享同一内存空间，当进程退出时，该进程所产生的所有线程都会被强制清除并且退出。。线程可与属于同一进程的其他线程共享进程的全部资源。 python的线程Threading用于提供线程相关的操作，线程是应用程序中的最小单元。 1.threading模块threading模块是对thread模块的二次封装，提供了更方便的api来">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-01-17T07:07:48.876Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="python线程">
+<meta name="twitter:description" content="进程与线程的关系线程是属于进程的，线程运行在进程空间内，同一进程所产生的线程共享同一内存空间，当进程退出时，该进程所产生的所有线程都会被强制清除并且退出。。线程可与属于同一进程的其他线程共享进程的全部资源。 python的线程Threading用于提供线程相关的操作，线程是应用程序中的最小单元。 1.threading模块threading模块是对thread模块的二次封装，提供了更方便的api来">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://windystreet.net/2019/01/16/python线程/">
+
+
+
+
+
+  <title>python线程 | 风居住的街道</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">风居住的街道</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://windystreet.net/2019/01/16/python线程/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="大长腿鲁班">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="风居住的街道">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">python线程</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-01-16T12:01:00+08:00">
+                19-01-16 12:01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
+                  <a href="/categories/python/" itemprop="url" rel="index">
+                    <span itemprop="name">python</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/01/16/python线程/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2019/01/16/python线程/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="进程与线程的关系"><a href="#进程与线程的关系" class="headerlink" title="进程与线程的关系"></a>进程与线程的关系</h3><p>线程是属于进程的，线程运行在进程空间内，同一进程所产生的线程共享同一内存空间，当进程退出时，该进程所产生的所有线程都会被强制清除并且退出。。线程可与属于同一进程的其他线程共享进程的全部资源。</p>
+<h3 id="python的线程"><a href="#python的线程" class="headerlink" title="python的线程"></a>python的线程</h3><p>Threading用于提供线程相关的操作，线程是应用程序中的最小单元。</p>
+<h4 id="1-threading模块"><a href="#1-threading模块" class="headerlink" title="1.threading模块"></a>1.threading模块</h4><p>threading模块是对thread模块的二次封装，提供了更方便的api来处理线程。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">import threading</span><br><span class="line">import time</span><br><span class="line">def work(num):</span><br><span class="line">    time.sleep(1)</span><br><span class="line">    print(&quot;the number is &#123;&#125;&quot;.format(num))</span><br><span class="line">   #return</span><br><span class="line"></span><br><span class="line">for i in range(20):</span><br><span class="line">    t = threading.Thread(target=work, args=(i,), name=&quot;t&#123;&#125;&quot;.format(i))</span><br><span class="line">    t.start()</span><br></pre></td></tr></table></figure></p>
+<a id="more"></a>
+<p>这里创建了20个线程，然后控制器就交给了cpu，cpu根据指定算法进行调度，分片执行命令。<br>方法说明:<br>1.t.start():激活线程<br>2.t.getName():获取线程名称<br>3.t.setName():设置线程名称<br>4.t.name:获取或者设置线程名称<br>5.t.is_alive():判断线程是否为激活状态<br>6.t.isAlive():判断线程是否为激活状态<br>7.t.setDaemon():设置为后台线程或者前台线程(默认为False),通过设定一个布尔值设置线程是否为守护线程，必须在start()方法之后才可以使用。如果是后台线程，主线程执行过程中，后台线程也在进行，主线程执行完毕，无论后台线程成功与否，均停止。如果是前台线程，主线程执行完毕，前台线程也在执行，主线程执行完毕后，等待前台线程也执行完毕后，程序停止。<br>8.t.isDaemon():判断是否为守护线程<br>9.t.ident:获取线程的标识符，线程标识符是一个非零整数，只有在调用了start()方法之后属性才有效,否则返回None。<br>10.t.join():逐个执行每个线程，执行完毕后往下执行，该方法使得多线程无意义。<br>11.t.run():线程被cpu调度后自动执行run方法。</p>
+<h4 id="2-线程锁threading-RLock和threading-Lock"><a href="#2-线程锁threading-RLock和threading-Lock" class="headerlink" title="2.线程锁threading.RLock和threading.Lock"></a>2.线程锁threading.RLock和threading.Lock</h4><p>由于线程之间是随机调度，并且每个线程可能执行n条执行后，cpu接着执行其他线程，为了保证数据的准确性，引入了锁的概念，可能出现的问题如下:<br>假如列表A的所有元素都为0,当一个线程从前向后打印所有元素，另一个线程从后向前修改列表的元素为1，那么输出的时候，列表的元素会一部分为0，一部分为1，导致了数据的不一致。锁的出现解决了这个问题。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">import threading</span><br><span class="line">import time</span><br><span class="line"></span><br><span class="line">global_num = 0</span><br><span class="line">lock = threading.RLock()</span><br><span class="line"></span><br><span class="line">def Func():</span><br><span class="line">    lock.acquire()    #获得锁</span><br><span class="line">    global global_num</span><br><span class="line">    global_num += 1</span><br><span class="line">    time.sleep(1)</span><br><span class="line">    print(global_num)</span><br><span class="line">    lock.release()    #释放锁</span><br><span class="line"></span><br><span class="line">for i in range(10):</span><br><span class="line">    t = threading.Thread(target=Func,)</span><br><span class="line">    t.start()</span><br></pre></td></tr></table></figure></p>
+<h4 id="3-thrading-RLock和thrading-Lock"><a href="#3-thrading-RLock和thrading-Lock" class="headerlink" title="3.thrading.RLock和thrading.Lock"></a>3.thrading.RLock和thrading.Lock</h4><p>RLock允许在同一线程被多次require，而Lock却不允许，如果使用RLock，那么acquire和release必须成对出现。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">import threading</span><br><span class="line">lock = threading.Lock()</span><br><span class="line">lock.require()</span><br><span class="line">lock.acquire()  ##产生了死锁</span><br><span class="line">lock.release()</span><br><span class="line">loack.release()</span><br><span class="line"></span><br><span class="line">rlock = threading.RLock()</span><br><span class="line">rlock.require()</span><br><span class="line">rlock.require() #在同一线程内，程序不会堵塞</span><br><span class="line">rlock.release()</span><br><span class="line">rlock.release()</span><br></pre></td></tr></table></figure></p>
+<h4 id="4-threding-Event"><a href="#4-threding-Event" class="headerlink" title="4.threding.Event"></a>4.threding.Event</h4><p>python线程的事件用于主线程控制其他线程的执行，事件主要提供了三个方法:set,wait,clear。<br>事件处理的机制:全局定义了一个<code>Flag</code>,如果<code>Flag</code>的值为False，那么当程序执行event.wait方法就会堵塞，如果<code>Flag</code>为True,那么event.wait方法时不会堵塞。</p>
+<ul>
+<li>clear: 将<code>Flag</code>设置为False</li>
+<li>set: 将<code>Flag</code>设置为True</li>
+<li>Event.isSet():判断标识位是否为True<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">import threading</span><br><span class="line"></span><br><span class="line">def do(event):</span><br><span class="line">    print(&apos;start&apos;)</span><br><span class="line">    print(&apos;event:&apos;,event.isSet())</span><br><span class="line">    event.wait()</span><br><span class="line">    print(&apos;execute&apos;)</span><br><span class="line">    </span><br><span class="line">event_obj = threading.Event()</span><br><span class="line">for i in range(10):</span><br><span class="line">    #event_obj.set()</span><br><span class="line">    t = threading.Thread(target=do, args=(event_obj,))</span><br><span class="line">    t.start()</span><br><span class="line">    </span><br><span class="line">event_obj.clear()</span><br><span class="line">inp = input(&quot;input:&quot;)</span><br><span class="line">if inp == &apos;true&apos;:</span><br><span class="line">    event_obj.set()</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>当线程执行的时候，如果Flag为False，则线程会阻塞，若为True，线程不会阻塞，提供了本地和远程的并发性。</p>
+<h4 id="5-threading-Condition"><a href="#5-threading-Condition" class="headerlink" title="5.threading.Condition"></a>5.threading.Condition</h4><p>一个condition变量总是与某些类型的锁相关联，这个可以使用默认的情况创建一个，当几个condition变量必须共享变量和同一个锁的时候是很有用的，锁是condition对象的一部分，没有必要分别跟踪.    </p>
+<p>condition变量服从上下文管理协议，with语句封闭之前可以取得和锁的联系，acquire()和release()会调用与锁相关的方法。   </p>
+<p>其他和锁关联的方法必须被调用,wait()方法会释放锁，当另一个线程使用notify()或者notify_all()唤醒它之前会一直阻塞，一旦被唤醒，wait()会重新获得 锁并返回。</p>
+<p>Condition实现了一个condition变量，这个condition变量<br>允许一个或者多个线程等待，直到他们被另一个线程通知。如果lock参数，被给定一个非空的值，那么他必须是一个lock或者Rlock对象，他用来做底层锁，否则会创建一个新的Rlock对象，用来做底层锁。</p>
+<ul>
+<li>wait(timeout=None):等待通知，或者等待设定的超时事件，当调用这个wait()方法时，如果调用他的线程没有得到锁，会抛出RuntimeError异常。wait()释放锁以后，在调用相同条件下的另一个进程用notify()或者notify_all()叫醒之前，会一直阻塞，wait()可指定超时时间。</li>
+</ul>
+<p>如果有等待的线程，notify()方法会唤醒一个在等待的condition变量的线程，notify_all()则会唤醒所有在等待的condition变量的线程。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">import threading</span><br><span class="line">import time</span><br><span class="line"></span><br><span class="line">def consumer(cond):</span><br><span class="line">    with cond:</span><br><span class="line">        print(&quot;consumer before wait&quot;)</span><br><span class="line">        cond.wait()</span><br><span class="line">        print(&quot;consumer after wait&quot;)</span><br><span class="line"></span><br><span class="line">def producter(cond):</span><br><span class="line">    with cond:</span><br><span class="line">        print(&quot;producter beofre notifyAll&quot;)</span><br><span class="line">        cond.notifyAll()</span><br><span class="line">        print(&quot;producter after notifyAll&quot;)</span><br><span class="line">        </span><br><span class="line">condition = threading.Condition()</span><br><span class="line">c1 = threading.Thread(name=&apos;c1&apos;, target=consumer, args=(condition,))</span><br><span class="line">c2 = threading.Thread(name=&apos;c2&apos;, target=consumer, args=(condition,))</span><br><span class="line">p1 = threading.Thread(name=&apos;p1&apos;, target=producter, args=(condition,))</span><br><span class="line"></span><br><span class="line">c1.start()</span><br><span class="line">time.sleep(2)</span><br><span class="line">c2.start()</span><br><span class="line">time.sleep(2)</span><br><span class="line">p1.start()</span><br><span class="line"></span><br><span class="line">输出:</span><br><span class="line">consumer before wait</span><br><span class="line">consumer before wait</span><br><span class="line">producter beofre notifyAll</span><br><span class="line">producter after notifyAll</span><br><span class="line">consumer after wait</span><br><span class="line">consumer after wait</span><br></pre></td></tr></table></figure></p>
+<h4 id="6-queue模块"><a href="#6-queue模块" class="headerlink" title="6.queue模块"></a>6.queue模块</h4><p>Queue就是队列，他是线程安全的，举例来说，我们去麦当劳吃饭，前台负责把做好的饭卖给顾客，顾客去前台领取做好的饭，这里的前台相当于我们的队列，厨师做好饭通过前台传递给顾客，所谓单项队列。这个模型也叫生产者-消费者模型。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">import queue</span><br><span class="line">import threading</span><br><span class="line">import time</span><br><span class="line"></span><br><span class="line">class Threadingpool():</span><br><span class="line">    def __init__(self, max_num=10):</span><br><span class="line">        self.queue = queue.Queue(max_num)</span><br><span class="line">        for i in range(max_num):</span><br><span class="line">            self.queue.put(threading.Thread)</span><br><span class="line">    </span><br><span class="line">    def getThreading(self):</span><br><span class="line">        return self.queue.get()</span><br><span class="line">    </span><br><span class="line">    def addThreading(self):</span><br><span class="line">        return self.queue.put(threading.Thread)</span><br><span class="line">    </span><br><span class="line">def func(p, i):</span><br><span class="line">    time.sleep(1)</span><br><span class="line">    print(i)</span><br><span class="line">    p.addThreading()</span><br><span class="line">    </span><br><span class="line">if __name__ == &apos;__main__&apos;:</span><br><span class="line">    p = Threadingpool()</span><br><span class="line">    for i in range(11):</span><br><span class="line">        thread = p.getThreading()</span><br><span class="line">        print(thread)</span><br><span class="line">        t = thread(target= func, args=(p, i))</span><br><span class="line">        t.start()</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/python/" rel="tag"># python</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/01/04/redis/" rel="next" title="redis">
+                <i class="fa fa-chevron-left"></i> redis
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/01/16/python进程/" rel="prev" title="python进程">
+                python进程 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="大长腿鲁班">
+            
+              <p class="site-author-name" itemprop="name">大长腿鲁班</p>
+              <p class="site-description motion-element" itemprop="description">悠悠苍天，何薄于我 -诸葛</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">21</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/guo897654050" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://weibo.com/u/5021302462" target="_blank" title="微博">
+                      
+                        <i class="fa fa-fw fa-weibo"></i>微博</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#进程与线程的关系"><span class="nav-number">1.</span> <span class="nav-text">进程与线程的关系</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#python的线程"><span class="nav-number">2.</span> <span class="nav-text">python的线程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-threading模块"><span class="nav-number">2.1.</span> <span class="nav-text">1.threading模块</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-线程锁threading-RLock和threading-Lock"><span class="nav-number">2.2.</span> <span class="nav-text">2.线程锁threading.RLock和threading.Lock</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-thrading-RLock和thrading-Lock"><span class="nav-number">2.3.</span> <span class="nav-text">3.thrading.RLock和thrading.Lock</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-threding-Event"><span class="nav-number">2.4.</span> <span class="nav-text">4.threding.Event</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-threading-Condition"><span class="nav-number">2.5.</span> <span class="nav-text">5.threading.Condition</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#6-queue模块"><span class="nav-number">2.6.</span> <span class="nav-text">6.queue模块</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">大长腿鲁班</span>
+
+  
+</div>
+
+
+<div class="powered-by">
+<i class="fa fa-user-md"></i><span id="busuanzi_container_site_uv">
+  本站访客数:<span id="busuanzi_value_site_uv"></span>
+</span>
+</div>
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'kgXwARBSb6kIcni5deGNp1zl-gzGzoHsz',
+        appKey: 'yWBy1sXSK5yTTOI9YYw54UB5',
+        placeholder: '填写下你的心得吧',
+        avatar:'retro',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

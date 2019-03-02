@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="redis,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="持久化选项redis提供了两种不同的持久化方法来将数据存储到硬盘中。一种方法叫做快照(snapshotting)，他可以将某一时刻的所有数据写入硬盘。另一种叫做只追加文件(appedn-only file,AOF),他会在执行写命令时，将被执行的写命令复制到硬盘中，这两种持久化方法即可以同时使用也可以单独使用。将内存的数据存储到硬盘的主要原因是为了在之后重用数据，或是为了防止系统故障将数据备份到另">
+<meta name="keywords" content="redis">
+<meta property="og:type" content="article">
+<meta property="og:title" content="redis持久化">
+<meta property="og:url" content="http://windystreet.net/2019/02/25/redis持久化/index.html">
+<meta property="og:site_name" content="风居住的街道">
+<meta property="og:description" content="持久化选项redis提供了两种不同的持久化方法来将数据存储到硬盘中。一种方法叫做快照(snapshotting)，他可以将某一时刻的所有数据写入硬盘。另一种叫做只追加文件(appedn-only file,AOF),他会在执行写命令时，将被执行的写命令复制到硬盘中，这两种持久化方法即可以同时使用也可以单独使用。将内存的数据存储到硬盘的主要原因是为了在之后重用数据，或是为了防止系统故障将数据备份到另">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://windystreet.net/images/AOF-replication.bmp">
+<meta property="og:image" content="http://windystreet.net/images/AOF-replication.bmp">
+<meta property="og:updated_time" content="2019-02-26T02:01:57.314Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="redis持久化">
+<meta name="twitter:description" content="持久化选项redis提供了两种不同的持久化方法来将数据存储到硬盘中。一种方法叫做快照(snapshotting)，他可以将某一时刻的所有数据写入硬盘。另一种叫做只追加文件(appedn-only file,AOF),他会在执行写命令时，将被执行的写命令复制到硬盘中，这两种持久化方法即可以同时使用也可以单独使用。将内存的数据存储到硬盘的主要原因是为了在之后重用数据，或是为了防止系统故障将数据备份到另">
+<meta name="twitter:image" content="http://windystreet.net/images/AOF-replication.bmp">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://windystreet.net/2019/02/25/redis持久化/">
+
+
+
+
+
+  <title>redis持久化 | 风居住的街道</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">风居住的街道</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://windystreet.net/2019/02/25/redis持久化/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="大长腿鲁班">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="风居住的街道">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">redis持久化</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-02-25T15:13:24+08:00">
+                19-02-25 15:13
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/02/25/redis持久化/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2019/02/25/redis持久化/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="持久化选项"><a href="#持久化选项" class="headerlink" title="持久化选项"></a>持久化选项</h3><p>redis提供了两种不同的持久化方法来将数据存储到硬盘中。一种方法叫做快照(snapshotting)，他可以将某一时刻的所有数据写入硬盘。另一种叫做只追加文件(appedn-only file,AOF),他会在执行写命令时，将被执行的写命令复制到硬盘中，这两种持久化方法即可以同时使用也可以单独使用。<br>将内存的数据存储到硬盘的主要原因是为了在之后重用数据，或是为了防止系统故障将数据备份到另一个远程位置</p>
+<h4 id="快照持久化"><a href="#快照持久化" class="headerlink" title="快照持久化"></a>快照持久化</h4><p>创建快照的方法</p>
+<ul>
+<li>客户端可以通过向redis发送BGSAVE命令来创建一个快照，对于支持BGSAVE命令的平台来说，redis会调用fork来创建一个子进程，然后子进程负责将快照写入硬盘，而父进程继续处理命令请求。</li>
+<li>客户端还可以通过向redis发送SAVE命令来创建一个快照，接到SAVE命令的redis服务器在快照创建完毕之前不再响应任何其他请求。SAVE命令并不常用，通常只会在没有足够内存去执行BGSAVE的命令情况下，或者等待持久化操作完毕后也无所谓的情况下，才会使用SAVE.</li>
+<li>如果用户设置了save的配置选项，比如<code>save 60 10000</code>，那么redis最近一次创建快照之后开始算起，当60s之后有10000次写入，这个条件被满足以后，redis会自动触发BGSAVE命令。如果用户设置了多个save配置，当任意一个save配置条件被满足，都会触发BGSAVE。</li>
+<li>当redis通过SHUTDOWN命令接收到关闭服务器的请求时，或者接受到标准的TERM信号时，会执行一个SAVE命令，阻塞所有客户端，不在执行刻画段发送的任何命令。并在SAVE命令之后关闭服务器。</li>
+<li>当一个redis服务器链接另一个redis服务器，并向对方发送SYNC命令来开始一次复制操作的时候，如果服务器目前没有执行BGSAVE操作，或者主服务器并非刚刚执行完BGSAVE操作，那么主服务器会执行BGSAVE。     <a id="more"></a>
+在只使用快照持久化来保存数据时，如果系统真的发生崩溃，那么用户将丢失最近一次生成快照之后的所有数据。因此快照持久化只适用于那些即使丢失一部分数据也不会造成问题的应用程序。</li>
+</ul>
+<h3 id="AOF持久化"><a href="#AOF持久化" class="headerlink" title="AOF持久化"></a>AOF持久化</h3><p>AOF持久化会将被执行的写命令写到AOF文件的末尾，以此来记录数据的变化。因此，redis只要从头到尾重新执行一次AOF文件包含的所有写命令，就可以恢复AOF文件所记录的数据集。appendfsync配置选项对AOF文件的同步频率的影响。</p>
+<ul>
+<li>always: 每个redis写命令都会同步写入硬盘，这样会严重降低redis的速度。</li>
+<li>everysec: 每秒执行一次同步，显式的将多个命令同步到硬盘</li>
+<li>no: 让操作系统决定何时同步</li>
+</ul>
+<h4 id="重写-压缩AOF文件"><a href="#重写-压缩AOF文件" class="headerlink" title="重写/压缩AOF文件"></a>重写/压缩AOF文件</h4><p>假如选择everysec，由于redis会不断的执行写命令记录到AOF文件中，随着redis的不断运行，AOF文件会不断增大，甚至用完硬盘所有空间。为了解决此问题，用户可以向redis发送BGREWRITEAOF，这个命令会移除AOF文件的冗余来重写AOF文件。<code>同快照持久化一样，重写需要用到子进程，由于快照持久化存在内存占中和性能问题，在AOF持久化同样存在</code>，如果不加以控制，AOF的文件会比快照文件大好几倍。<br>同快照持久化一样可以通设置save选项来自动执行BGSAVE一样，AOF持久化可以通过设置’auto-aof-rewrite-perventage’选项和<code>auto-aof-rewrite-min-size</code>选项来自动执行BGREWRITEAOF，例如，设置<code>auto-aof-rewrite-percentage 100</code>和<code>auto-aof-rewrite-min-size 64mb</code>，并且启用了AOF持久化，那么当AOF文件大于64mb，并且AOF文件的体积比上次重写之后体积增加了一倍，redis自动执行BGREWRITEAOF。<br>无论使用AOF持久化还是快照持久化，将数据持久化到硬盘上是十分有必要的，除此外，用户还需对持久化的文件进行备份，这样才能避免数据的丢失。但随着负载量的上升，或者数据的完整性越来越重要，用户可能需要复制特性。</p>
+<h4 id="复制-replication"><a href="#复制-replication" class="headerlink" title="复制(replication)"></a>复制(replication)</h4><p>复制可以让其他服务器拥有一个不断更新的数据副本，从而使得拥有数据副本的服务器可以处理客户端发送的请求。关系数据库通常会使用一个主服务器(master)向多个从服务器(salve)发送更新，并使用从服务器开处理所有请求。redis同理。<br>复制的过程如下:</p>
+<div style="width: 200px; margin: auto"><img src="/images/AOF-replication.bmp" alt="示例图片"></div>
+
+<p>从服务器的设置:用户可以通过配置选项SLAVEOF host port来讲一个redis服务器设置为服务器，也可以通过向正在运行的redis服务器发送SLAVEOF命令来将其设置为从服务器。</p>
+<ul>
+<li>如果使用SALVEOF配置选项设置，那么redis启动时会载入当前可用的任何快照或者AOF文件，然后连接主服务器完成上图的复制过程。</li>
+<li>如果使用SALVEOF命令，那么redis会立即尝试连接主服务器，并在连接成功后开始上图的复制过程。</li>
+</ul>
+<p>当多个从服务器尝试链接同一个主服务器，有时候可重用已有的快照文件。</p>
+<div style="width: 200px; margin: auto"><img src="/images/AOF-replication.bmp" alt="示例图片"></div>
+
+<h4 id="检验硬盘写入"><a href="#检验硬盘写入" class="headerlink" title="检验硬盘写入"></a>检验硬盘写入</h4><p>为了验证主服务器已经把数据发送至从服务器，用户需要再向主服务器写入一个唯一的虚构值(unique dummy value)，然后通过检查虚构值是否存在于从服务器来判断数据是否到达从服务器。但判断数据是否写入硬盘则相对困难，对于每秒同步一次的AOF文件，可通过等待一秒来确定数据是否写入硬盘。更节约时间的做法是检查INFO命令的输出结果中aof_pending_bio_fsync的属性是否为0，如果是的话，那么就表示服务器保存至硬盘。在向主服务器写入数据后，用户可以将二者的链接作为参数，然后执行检查。代码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">import time</span><br><span class="line">import uuid</span><br><span class="line"></span><br><span class="line">##wait_for_sync</span><br><span class="line">def wait_for_sync(mconn, sconn):</span><br><span class="line">    identifier = str(uuid.uuid4()) #添加随机的令牌利用uuid生成</span><br><span class="line">    #print(identifier)</span><br><span class="line">    mconn.zadd(&apos;sync:wait&apos;, identifier, time.time())  #将令牌添加至主服务器</span><br><span class="line">    </span><br><span class="line">    while not sconn.info()[&apos;master_link_status&apos;] != &apos;up&apos;: #如果有必要，等待从服务器完成同步</span><br><span class="line">        time.sleep(.001)</span><br><span class="line">        </span><br><span class="line">    while not sconn.zscore(&apos;sync:wait&apos;, identifier): #等待从服务器接受数据更新</span><br><span class="line">        time.sleep(.001)</span><br><span class="line">        </span><br><span class="line">    deadline = time.time() + 1.01   #最多等待1s</span><br><span class="line">    while time.time() &lt; deadline:</span><br><span class="line">        if sconn.info()[&apos;aof_pending_bio_fsync&apos;] == 0: #检查数据是否存入了硬盘，等于0则存入</span><br><span class="line">            break</span><br><span class="line">        time.sleep(.001)</span><br><span class="line">    mconn.zrem(&apos;sync:wait&apos;, identifier)</span><br><span class="line">    mconn.zremrangebyscore(&apos;sync:wait&apos;, 0, time.time()-900) #清理刚创建的新令牌以及之前可能留下的旧令牌,900s</span><br><span class="line">    </span><br><span class="line">    #zremrange的使用</span><br><span class="line">    #     redis&gt; ZRANGE salary 0 -1 WITHSCORES          # 显示有序集内所有成员及其 score 值</span><br><span class="line">    # 1) &quot;tom&quot;</span><br><span class="line">    # 2) &quot;2000&quot;</span><br><span class="line">    # 3) &quot;peter&quot;</span><br><span class="line">    # 4) &quot;3500&quot;</span><br><span class="line">    # 5) &quot;jack&quot;</span><br><span class="line">    # 6) &quot;5000&quot;</span><br><span class="line"></span><br><span class="line">    # redis&gt; ZREMRANGEBYSCORE salary 1500 3500      # 移除所有薪水在 1500 到 3500 内的员工</span><br><span class="line">    # (integer) 2</span><br><span class="line"></span><br><span class="line">    # redis&gt; ZRANGE salary 0 -1 WITHSCORES          # 剩下的有序集成员</span><br><span class="line">    # 1) &quot;jack&quot;</span><br><span class="line">    # 2) &quot;5000&quot;</span><br></pre></td></tr></table></figure></p>
+<p>其中info命令提供了大量与redis服务器有关的信息，比如内存占用量，，客户端连接数，每个数据库包含的键的数量，上次创建快照文件之后执行的命令的数量等等。<br>为了确保操作正确执行wait_for_sync()函数会首先确认从服务器连接上主服务器，然后检查自己添加到等待同步有序集合里面的值是否存在从服务器，在发现值已经存在于从服务器，函数会检查从服务器写入缓冲区的状态，并在1s之内，等待从服务器将缓冲区的所有数据存硬盘。孙然函数等待1s，但是大部分同步会在很短的时间内完成。最后确认数据保存到硬盘，函数会执行一些清理操作。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/redis/" rel="tag"># redis</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/02/25/redis事务/" rel="next" title="redis事务">
+                <i class="fa fa-chevron-left"></i> redis事务
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/02/25/redis事务2/" rel="prev" title="redis事务2">
+                redis事务2 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="大长腿鲁班">
+            
+              <p class="site-author-name" itemprop="name">大长腿鲁班</p>
+              <p class="site-description motion-element" itemprop="description">悠悠苍天，何薄于我 -诸葛</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">21</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/guo897654050" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://weibo.com/u/5021302462" target="_blank" title="微博">
+                      
+                        <i class="fa fa-fw fa-weibo"></i>微博</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#持久化选项"><span class="nav-number">1.</span> <span class="nav-text">持久化选项</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#快照持久化"><span class="nav-number">1.1.</span> <span class="nav-text">快照持久化</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#AOF持久化"><span class="nav-number">2.</span> <span class="nav-text">AOF持久化</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#重写-压缩AOF文件"><span class="nav-number">2.1.</span> <span class="nav-text">重写/压缩AOF文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#复制-replication"><span class="nav-number">2.2.</span> <span class="nav-text">复制(replication)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#检验硬盘写入"><span class="nav-number">2.3.</span> <span class="nav-text">检验硬盘写入</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">大长腿鲁班</span>
+
+  
+</div>
+
+
+<div class="powered-by">
+<i class="fa fa-user-md"></i><span id="busuanzi_container_site_uv">
+  本站访客数:<span id="busuanzi_value_site_uv"></span>
+</span>
+</div>
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'kgXwARBSb6kIcni5deGNp1zl-gzGzoHsz',
+        appKey: 'yWBy1sXSK5yTTOI9YYw54UB5',
+        placeholder: '填写下你的心得吧',
+        avatar:'retro',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
