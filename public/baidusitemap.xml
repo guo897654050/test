@@ -1,11 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>http://windystreet.net/2019/02/25/redis%E4%BA%8B%E5%8A%A12/</loc>
-    <lastmod>2019-03-02T02:59:39.578Z</lastmod>
+    <loc>http://windystreet.net/2019/03/19/es6-1/</loc>
+    <lastmod>2019-03-19T15:37:47.345Z</lastmod>
+  </url>  <url>
+    <loc>http://windystreet.net/2019/03/15/python%E8%A3%85%E9%A5%B0%E5%99%A8/</loc>
+    <lastmod>2019-03-15T06:42:21.191Z</lastmod>
   </url>  <url>
     <loc>http://windystreet.net/2019/02/25/redis%E6%8C%81%E4%B9%85%E5%8C%96/</loc>
-    <lastmod>2019-02-26T02:01:57.314Z</lastmod>
+    <lastmod>2019-03-02T03:07:54.915Z</lastmod>
+  </url>  <url>
+    <loc>http://windystreet.net/2019/02/25/redis%E4%BA%8B%E5%8A%A12/</loc>
+    <lastmod>2019-03-02T02:59:39.578Z</lastmod>
   </url>  <url>
     <loc>http://windystreet.net/2019/02/25/redis%E4%BA%8B%E5%8A%A1/</loc>
     <lastmod>2019-02-25T07:14:26.986Z</lastmod>

@@ -3,7 +3,7 @@ layout: posts
 title: redis持久化
 date: 2019-02-25 15:13:24
 tags: redis
-catrgories: redis
+categories: redis
 ---
 
 ### 持久化选项

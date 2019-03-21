@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="python,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="转:一种自顶而下的python装饰器的设计方法昨天阅读了一篇关于装饰器的文章，读了感觉写的挺好的，自己在记录一遍加深印象。 python装饰器原理python装饰器的常规写法:123@decoratordef func(8args, **kwargs)    so_something() 这种写法只是一种语法糖，使得代码看起来更加简洁，在python解释器内部，函数func的调用被转换为下面的方式">
+<meta name="keywords" content="python">
+<meta property="og:type" content="article">
+<meta property="og:title" content="python装饰器">
+<meta property="og:url" content="http://windystreet.net/2019/03/15/python装饰器/index.html">
+<meta property="og:site_name" content="风居住的街道">
+<meta property="og:description" content="转:一种自顶而下的python装饰器的设计方法昨天阅读了一篇关于装饰器的文章，读了感觉写的挺好的，自己在记录一遍加深印象。 python装饰器原理python装饰器的常规写法:123@decoratordef func(8args, **kwargs)    so_something() 这种写法只是一种语法糖，使得代码看起来更加简洁，在python解释器内部，函数func的调用被转换为下面的方式">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-03-15T06:42:21.191Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="python装饰器">
+<meta name="twitter:description" content="转:一种自顶而下的python装饰器的设计方法昨天阅读了一篇关于装饰器的文章，读了感觉写的挺好的，自己在记录一遍加深印象。 python装饰器原理python装饰器的常规写法:123@decoratordef func(8args, **kwargs)    so_something() 这种写法只是一种语法糖，使得代码看起来更加简洁，在python解释器内部，函数func的调用被转换为下面的方式">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://windystreet.net/2019/03/15/python装饰器/">
+
+
+
+
+
+  <title>python装饰器 | 风居住的街道</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">风居住的街道</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://windystreet.net/2019/03/15/python装饰器/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="大长腿鲁班">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="风居住的街道">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">python装饰器</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-03-15T09:26:48+08:00">
+                19-03-15 09:26
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
+                  <a href="/categories/python/" itemprop="url" rel="index">
+                    <span itemprop="name">python</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/03/15/python装饰器/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2019/03/15/python装饰器/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="转-一种自顶而下的python装饰器的设计方法"><a href="#转-一种自顶而下的python装饰器的设计方法" class="headerlink" title="转:一种自顶而下的python装饰器的设计方法"></a>转:一种自顶而下的python装饰器的设计方法</h3><p>昨天阅读了一篇关于装饰器的文章，读了感觉写的挺好的，自己在记录一遍加深印象。</p>
+<h4 id="python装饰器原理"><a href="#python装饰器原理" class="headerlink" title="python装饰器原理"></a>python装饰器原理</h4><p>python装饰器的常规写法:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">@decorator</span><br><span class="line">def func(8args, **kwargs)</span><br><span class="line">    so_something()</span><br></pre></td></tr></table></figure></p>
+<p>这种写法只是一种语法糖，使得代码看起来更加简洁，在python解释器内部，函数<code>func</code>的调用被转换为下面的方式.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt;func(a, ,b, c=&apos;value&apos;)</span><br><span class="line">&gt;&gt;&gt;decorated_func = decorator(func)</span><br><span class="line">&gt;&gt;&gt;decorated_func(a, b, c=&apos;value&apos;)</span><br></pre></td></tr></table></figure></p>
+<a id="more"></a>
+<h4 id="简单装饰器"><a href="#简单装饰器" class="headerlink" title="简单装饰器"></a>简单装饰器</h4><p>简单的装饰器不带任何参数，例如，我们把装饰器命名为<code>timethis</code><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">@timethis</span><br><span class="line">def func(*args, **kwargs):</span><br><span class="line">    pass</span><br></pre></td></tr></table></figure></p>
+<p>根据上文的分解，我们可以写出装饰器的模板代码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">def timethis(func):</span><br><span class="line">    def wrapper(*args, **kwargs):</span><br><span class="line">        pass</span><br><span class="line">    return wrapper</span><br></pre></td></tr></table></figure></p>
+<p>如此，装饰器的框架搭建好了，需要丰富下函数的逻辑。对于被装饰的<code>func</code>的调用，相当于对wrapper的调用。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">def timethis(func)</span><br><span class="line">    def wrapper(*args, **kwargs):</span><br><span class="line">        result = func(*args, **kwargs)</span><br><span class="line">        return result</span><br><span class="line">    return wrapper</span><br></pre></td></tr></table></figure></p>
+<p>我们可以丰富函数<code>wrapper</code>的逻辑，我们的需求是打印<code>func</code>的调用时间,在’func’前后调用计时。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">def timethis(func):</span><br><span class="line">    def wrapper(*args, **kwargs):</span><br><span class="line">        start = time.time()</span><br><span class="line">        result = func(*args, **kwargs)</span><br><span class="line">        end = time.time()</span><br><span class="line">        print(func.__name__, end-start)</span><br><span class="line">        return result</span><br><span class="line">    return wrapper</span><br></pre></td></tr></table></figure></p>
+<p>至此，完成一个打印函数事件的装饰器，不过在<code>func.__name__</code>这里，我们会返回wrapper，只需要在加上<code>@wrap(func)</code>即可返回正确的名称。测试一下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">@timethis</span><br><span class="line">def fibonacci(n):</span><br><span class="line">    a = b = 1</span><br><span class="line">    while n &gt; 2:</span><br><span class="line">        a, b = b, a+b</span><br><span class="line">        n -= 1</span><br><span class="line">    return b</span><br><span class="line">fibonacci(100)</span><br></pre></td></tr></table></figure>
+<h4 id="带参数的装饰器"><a href="#带参数的装饰器" class="headerlink" title="带参数的装饰器"></a>带参数的装饰器</h4><p>上面的装饰器简单些，不带参数，我们常看到带有参数的装饰器。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">@logged(debug, name=&apos;example&apos;, message=&apos;message&apos;)</span><br><span class="line">def func(*args, **kwargs):</span><br><span class="line">    pass</span><br></pre></td></tr></table></figure></p>
+<p><code>logged</code>返回一个装饰器，这个装饰器再去装饰<code>func</code>函数，因此<code>logged</code>的模板应为:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">def logged(level, name=None, message=None):</span><br><span class="line">    def decorator(func):</span><br><span class="line">        @wraps(func)</span><br><span class="line">        def wrapper(*args, **kwargs):</span><br><span class="line">            pass</span><br><span class="line">        return wrapper</span><br><span class="line">    return decorator</span><br></pre></td></tr></table></figure></p>
+<p>可见<code>wrapper</code>是最终被调用的函数,我们可以丰富<code>decorator</code>和<code>wrapper</code>这两个函数。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">from functools import wraps</span><br><span class="line">def logged(level, name=None, message=None):</span><br><span class="line">    def decorator(func):</span><br><span class="line">        logname = name if name else func.__module__</span><br><span class="line">        logmsg = message if message else func.__name__</span><br><span class="line">        @wraps</span><br><span class="line">        def wrapper(*args, kwargs):</span><br><span class="line">            print(level, logname, logmsg)</span><br><span class="line">            result = func(*args, **kwargs)</span><br><span class="line">        return wrapper</span><br><span class="line">    return decorator</span><br></pre></td></tr></table></figure></p>
+<p>例子如下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">from functools import wraps</span><br><span class="line">    ...: def logged(level, name=None, message=None):</span><br><span class="line">    ...:     def decorator(func):</span><br><span class="line">    ...:         logname = name if name else func.__module__</span><br><span class="line">    ...:         logmsg = message if message else func.__name__</span><br><span class="line">    ...:         @wraps(func)</span><br><span class="line">    ...:         def wrapper(*args, **kwargs):</span><br><span class="line">    ...:             print(level, logname, logmsg)</span><br><span class="line">    ...:             result = func(*args, **kwargs)</span><br><span class="line">    ...:             return result</span><br><span class="line">    ...:         return wrapper</span><br><span class="line">    ...:     return decorator</span><br><span class="line"></span><br><span class="line">@logged(&apos;info&apos;, name=&apos;aaa&apos;, message=&apos;bbb&apos;)</span><br><span class="line">def test(a,b):</span><br><span class="line">    return a+b</span><br><span class="line">    </span><br><span class="line">test(1,3)</span><br><span class="line">输出: info aaa bbb</span><br><span class="line">out 4</span><br></pre></td></tr></table></figure></p>
+<h4 id="多功能装饰器"><a href="#多功能装饰器" class="headerlink" title="多功能装饰器"></a>多功能装饰器</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">@logged</span><br><span class="line">def func(*args, **args):</span><br><span class="line">    pass</span><br><span class="line">    </span><br><span class="line">@logged(level, name=&apos;example&apos;, message=&apos;example&apos;)</span><br><span class="line">def func(*args, **kwargs):</span><br><span class="line">    pass</span><br></pre></td></tr></table></figure>
+<p>根据前面的分析，带有参数的装饰器和不带参数的装饰器是不同的，不带参数的装饰器返回的是被装饰的函数，而带参数的装饰器返回的是不带参数的装饰器(不太准确，被传递的func也算作参数),然后再返回被装饰的函数，多了一层相当于。需要用到<code>partial</code>。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">from functools import wraps, partial</span><br><span class="line"></span><br><span class="line">def logged(func=None, level=&apos;debug&apos;, name=None, message=None):</span><br><span class="line">    if func is None:</span><br><span class="line">        reutrn partial(logged, level=level, name=name, message=message)</span><br><span class="line">    logname = name if name else func.__module__</span><br><span class="line">    logmsg = message if message else func.__name__</span><br><span class="line">    </span><br><span class="line">    @wraps(func)</span><br><span class="line">    def wrapper(*args, **kwargs):</span><br><span class="line">        print(level, lgoname, logmsg)</span><br><span class="line">        return func(*args, **kwargs)</span><br><span class="line">    return wrapper</span><br></pre></td></tr></table></figure></p>
+<p>这个装饰器以带参数的形式使用，这里的第一个参数<code>func</code><br>值为<code>None</code>,此时我们用<code>partial</code>反返回了一个其他参数的固定装饰器，这个装饰器与不带参数的简单装饰器一样。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"> #使用@logged装饰</span><br><span class="line">&gt;&gt;&gt;func(a, b, c)</span><br><span class="line">&gt;&gt;&gt; decorated_func = logged(func)  #可见func不为空</span><br><span class="line">&gt;&gt;&gt; decorated_func(a, b, c)</span><br><span class="line"></span><br><span class="line"> #使用@logged(level=level, name=&apos;example&apos;, message=&apos;message&apos; )</span><br><span class="line"> 相当于</span><br><span class="line">&gt;&gt;&gt; decorator = logged(level=level, name=&apos;example&apos;, message=&apos;message&apos;)</span><br><span class="line">&gt;&gt;&gt; decorated_func = decorator(func)</span><br><span class="line">&gt;&gt;&gt; decorated_fun(a,b,c)</span><br><span class="line"></span><br><span class="line"> #例子如下</span><br><span class="line">@logged</span><br><span class="line">def test(a,b):</span><br><span class="line">   reutrn a+b</span><br><span class="line">test(1,2)</span><br><span class="line">输出: None, __main__ test, 第一个是level默认为None</span><br><span class="line"></span><br><span class="line">@logged(level=&apos;aa&apos;, name=&apos;bb&apos;, message=&apos;cc&apos;)</span><br><span class="line">def test(a,b):</span><br><span class="line">    return a+b</span><br><span class="line">    </span><br><span class="line">test(3,4)</span><br><span class="line">输出: aa,bb,cc</span><br></pre></td></tr></table></figure></p>
+<p>例子<br>设计一个装饰器函数retry,当被装饰的函数抛出指定的异常时候，函数会被重新调用，直到达到最大调用次数才重新抛出指定的异常，使用示例如下<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">@retry(times=10, traced_exception=ValueError,reraised_exception=CustomException)</span><br><span class="line">def test():</span><br><span class="line">    pass</span><br></pre></td></tr></table></figure></p>
+<p>其中，traced_exception为监控的异常，可以为None(默认),异常类，或者一个异常类的列表，如果为None，则监听所有的异常；如果指定了异常类，若函数调用抛出指定的异常，重新调用函数，直至返回成功或者达到最大尝试次数，此时重新抛出原异常(reraised_exception的值为None），或者抛出有reraised_exception指定的异常。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">def retry(times=10, traced_exception=None, reraised_exception=None):</span><br><span class="line">    def decorator(func)</span><br><span class="line">        @wraps</span><br><span class="line">        def wrapper(*args, **kwargs):</span><br><span class="line">            n = times</span><br><span class="line">            traced_all =  traced_exption is None</span><br><span class="line">            traced_spec = traced_exption is not None</span><br><span class="line">            while True:</span><br><span class="line">                try:</span><br><span class="line">                    return func(*args, **kwargs)</span><br><span class="line">                except Exception as e:</span><br><span class="line">                    traced = traced_spec and isinstance(e, traced_exception)    </span><br><span class="line">                    reached_limits = n == 0</span><br><span class="line">                    if not(trace_all or  traced) or reached_limits:</span><br><span class="line">                        if reraise_exception is not None:</span><br><span class="line">                            raise reraise_exception</span><br><span class="line">                        raise</span><br><span class="line">                    n -= 1</span><br><span class="line">        return wrapper</span><br><span class="line">    return decorator</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/python/" rel="tag"># python</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/02/25/redis事务2/" rel="next" title="redis事务2">
+                <i class="fa fa-chevron-left"></i> redis事务2
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/03/19/es6-1/" rel="prev" title="es6-1">
+                es6-1 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="大长腿鲁班">
+            
+              <p class="site-author-name" itemprop="name">大长腿鲁班</p>
+              <p class="site-description motion-element" itemprop="description">悠悠苍天，何薄于我 -诸葛</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">23</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">11</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">11</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/guo897654050" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://weibo.com/u/5021302462" target="_blank" title="微博">
+                      
+                        <i class="fa fa-fw fa-weibo"></i>微博</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#转-一种自顶而下的python装饰器的设计方法"><span class="nav-number">1.</span> <span class="nav-text">转:一种自顶而下的python装饰器的设计方法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#python装饰器原理"><span class="nav-number">1.1.</span> <span class="nav-text">python装饰器原理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#简单装饰器"><span class="nav-number">1.2.</span> <span class="nav-text">简单装饰器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#带参数的装饰器"><span class="nav-number">1.3.</span> <span class="nav-text">带参数的装饰器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#多功能装饰器"><span class="nav-number">1.4.</span> <span class="nav-text">多功能装饰器</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">大长腿鲁班</span>
+
+  
+</div>
+
+
+<div class="powered-by">
+<i class="fa fa-user-md"></i><span id="busuanzi_container_site_uv">
+  本站访客数:<span id="busuanzi_value_site_uv"></span>
+</span>
+</div>
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'kgXwARBSb6kIcni5deGNp1zl-gzGzoHsz',
+        appKey: 'yWBy1sXSK5yTTOI9YYw54UB5',
+        placeholder: '填写下你的心得吧',
+        avatar:'retro',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

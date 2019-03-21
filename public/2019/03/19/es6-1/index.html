@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="ES6,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="数据类型 数字 字符串 布尔 null undefined object 符号(symbol)  字符串增加了模板字符串，避免经常使用+1234例如let a = &amp;apos;dog&amp;apos;let b = &amp;apos;lili&amp;apos;let message = `this is my $&amp;#123;a&amp;#125; named $&amp;#123;b&amp;#125;` ##反丿号 多行字符串也可使用反">
+<meta name="keywords" content="ES6">
+<meta property="og:type" content="article">
+<meta property="og:title" content="es6-1">
+<meta property="og:url" content="http://windystreet.net/2019/03/19/es6-1/index.html">
+<meta property="og:site_name" content="风居住的街道">
+<meta property="og:description" content="数据类型 数字 字符串 布尔 null undefined object 符号(symbol)  字符串增加了模板字符串，避免经常使用+1234例如let a = &amp;apos;dog&amp;apos;let b = &amp;apos;lili&amp;apos;let message = `this is my $&amp;#123;a&amp;#125; named $&amp;#123;b&amp;#125;` ##反丿号 多行字符串也可使用反">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-03-19T15:37:47.345Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="es6-1">
+<meta name="twitter:description" content="数据类型 数字 字符串 布尔 null undefined object 符号(symbol)  字符串增加了模板字符串，避免经常使用+1234例如let a = &amp;apos;dog&amp;apos;let b = &amp;apos;lili&amp;apos;let message = `this is my $&amp;#123;a&amp;#125; named $&amp;#123;b&amp;#125;` ##反丿号 多行字符串也可使用反">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://windystreet.net/2019/03/19/es6-1/">
+
+
+
+
+
+  <title>es6-1 | 风居住的街道</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">风居住的街道</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://windystreet.net/2019/03/19/es6-1/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="大长腿鲁班">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="风居住的街道">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">es6-1</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-03-19T20:05:24+08:00">
+                19-03-19 20:05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
+                  <a href="/categories/ES6/" itemprop="url" rel="index">
+                    <span itemprop="name">ES6</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/03/19/es6-1/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2019/03/19/es6-1/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h4 id="数据类型"><a href="#数据类型" class="headerlink" title="数据类型"></a>数据类型</h4><ul>
+<li>数字</li>
+<li>字符串</li>
+<li>布尔</li>
+<li>null</li>
+<li>undefined</li>
+<li>object</li>
+<li>符号(symbol)</li>
+</ul>
+<h5 id="字符串"><a href="#字符串" class="headerlink" title="字符串"></a>字符串</h5><p>增加了模板字符串，避免经常使用+<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">例如</span><br><span class="line">let a = &apos;dog&apos;</span><br><span class="line">let b = &apos;lili&apos;</span><br><span class="line">let message = `this is my $&#123;a&#125; named $&#123;b&#125;` ##反丿号</span><br></pre></td></tr></table></figure></p>
+<p>多行字符串也可使用反丿号包裹<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">const a = `line1</span><br><span class="line">            line2`</span><br></pre></td></tr></table></figure></p>
+<a id="more"></a>
+<h4 id="符号"><a href="#符号" class="headerlink" title="符号"></a>符号</h4><p>符号是ES6的新特性，它是一种新的数据类型，代表一个唯一的标志，符号一经创建就是独一无二的，他不会匹配其他任何符号。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">const red = Symbol()</span><br><span class="line">const oranger = Symbol(&quot;The color of a sunset!&quot;)</span><br><span class="line">red === oranger //false</span><br></pre></td></tr></table></figure></p>
+<h4 id="null和undefined"><a href="#null和undefined" class="headerlink" title="null和undefined"></a>null和undefined</h4><p>js的两种特殊类型，null和undefined，他们俩都有一个唯一的值，分别为null和undefined，这两者都代表不存在。<br>一般来说，null是给开发者用的，而undefined是给js用的，用来表示未赋值的内容。当需要表示一个变量的值是<code>未知</code>或者不适用的时候，常见的做法是null。<code>当声明的变量没有赋值的时候，变量会有一个默认值undefined</code>。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">let currentTime  //隐含值undefined</span><br><span class="line">const taget = null  //target为null，代表还不知道,const声明要赋值</span><br><span class="line">currentTime = 19.7</span><br></pre></td></tr></table></figure></p>
+<h3 id="对象"><a href="#对象" class="headerlink" title="对象"></a>对象</h3><p>对象与基本类型不太一致，基本类型只能代表一个值，而对象可以代表多个值或者复杂的值。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">const obj = &#123;&#125;</span><br></pre></td></tr></table></figure></p>
+<p>对象的内容成为属性，属性由键和值组成。对象还可以包含函数<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">obj.size = function () &#123;</span><br><span class="line">    return &apos;xxxx&apos;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>通过delete来删除属性<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">delete obj.size  //返回true</span><br></pre></td></tr></table></figure></p>
+<h4 id="日期"><a href="#日期" class="headerlink" title="日期"></a>日期</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">const now = new Date()</span><br><span class="line">const hallween = new Date(2019, 2, 18) //月份中0开始</span><br><span class="line">const time_now = new Date(2019, 9, 31, 19, 0)</span><br><span class="line"></span><br><span class="line">time_now.getFullYear() //2019</span><br><span class="line">time_now.getMonth()  //9</span><br><span class="line">time_now.getDate()  //31</span><br><span class="line">time_now.getDay()  //对着英文的0=Sunday,1=Monday</span><br><span class="line">time_now.getHours()  //19</span><br><span class="line">time_now.getMinutes()  //0</span><br><span class="line">time_now.getSeconds()  //0</span><br><span class="line">time_now.getMillseconds() //0</span><br></pre></td></tr></table></figure>
+<h4 id="映射和集合"><a href="#映射和集合" class="headerlink" title="映射和集合"></a>映射和集合</h4><p>ES6引入了Map和Set，及他们的弱引用类型WeakMap和WeakSet</p>
+<h4 id="数据转化"><a href="#数据转化" class="headerlink" title="数据转化"></a>数据转化</h4><h5 id="转化为数字"><a href="#转化为数字" class="headerlink" title="转化为数字"></a>转化为数字</h5><p>字符串转化为数字<br>1.使用Number<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">const numStr = &quot;33.3&quot;</span><br><span class="line">const num = Number(numStr) //如果字符串不符合数字格式返回NaN</span><br></pre></td></tr></table></figure></p>
+<p>2.使用ParseInt和ParseFloat,其可以跟进制<br>3.日期转化为数字<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">const d = new Date()</span><br><span class="line">const ts = d.valueOf() //返回毫秒数，距utc时间</span><br></pre></td></tr></table></figure></p>
+<h5 id="转化为字符串"><a href="#转化为字符串" class="headerlink" title="转化为字符串"></a>转化为字符串</h5><p>js的任何对象都有toString()方法，数组的比较实用。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">const arr = [1, true, &apos;hello&apos;]</span><br><span class="line">arr.toString() // &quot;1,true,hello&quot;</span><br></pre></td></tr></table></figure></p>
+<h4 id="真值和假值"><a href="#真值和假值" class="headerlink" title="真值和假值"></a>真值和假值</h4><p>下面的值在js都为false</p>
+<ul>
+<li>undefined</li>
+<li>null</li>
+<li>false</li>
+<li>0 </li>
+<li>NaN</li>
+<li>‘’<br>以下为部分真值：</li>
+<li>所有对象(包括valueOf()返回的false对象)</li>
+<li>所有数组包括空数组</li>
+<li>仅仅包含空格的字符串</li>
+<li>字符串”false”</li>
+</ul>
+<h4 id="短路求值"><a href="#短路求值" class="headerlink" title="短路求值"></a>短路求值</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">const skip = true</span><br><span class="line">let x = 0</span><br><span class="line">const result = skip || x++  //true,由于为true，那么直接返回而不计算x++,若为false，两个都执行则result为0，</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">const doit = false</span><br><span class="line">let x = 0</span><br><span class="line">const result = doit &amp;&amp; x++ //false，如果doit为true,结果还是result=0,而不是false？</span><br></pre></td></tr></table></figure>
+<h4 id="算术运算符"><a href="#算术运算符" class="headerlink" title="算术运算符"></a>算术运算符</h4><ul>
+<li>x++:后置自增运算符，给x的值加1，并在x增加前计算它的值</li>
+<li>++x:前置自增运算符，给x的值加1，并计算他的值</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">let x = 2</span><br><span class="line">const r1 = x++ + x++  //分解第一个x++,在x的值变为3，那么x++是计算自增前的值，即为(2+3)，结果为5，而x为4.</span><br><span class="line">const r2 = ++x + ++x  //分解第一个++x，x的值变为5，为(5+6) =11 ,x的值为6</span><br><span class="line">const r3 = x++ + ++x  //分解第一个x++,x的值变为7，x++计算之前，(6+8)=14, x的值为8</span><br><span class="line"></span><br><span class="line">let y = 10</span><br><span class="line">const z = y++ ;z为10;y为11</span><br></pre></td></tr></table></figure>
+<h4 id="数字的比较"><a href="#数字的比较" class="headerlink" title="数字的比较"></a>数字的比较</h4><p>例子<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">let n = 0</span><br><span class="line">while(true) &#123;</span><br><span class="line">    n += 0.1</span><br><span class="line">    if(n === 0.3) &#123;</span><br><span class="line">        break;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">console.log(n)</span><br></pre></td></tr></table></figure></p>
+<p>这里跳过0.3，由于0.1不能精确代表一个双精度值。可使用Number.EPSILON,代表一个非常小的数字<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">let n = 0</span><br><span class="line">while (true) &#123;</span><br><span class="line">    n += 0.1</span><br><span class="line">    if (Math.abs(n - 0.3) &lt; Numbers.EPSILON) &#123;</span><br><span class="line">        break;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="类判断运算符"><a href="#类判断运算符" class="headerlink" title="类判断运算符"></a>类判断运算符</h4><ul>
+<li>typeof(undefined): “undefined”</li>
+<li>typeof(null): “object” //没办法</li>
+<li>typeof({}): “object”</li>
+<li>typeof(true): “boolean”</li>
+<li>typeof(1): “number”</li>
+<li>typeof(“”): “string”</li>
+<li>typeof(Symbol()): “symbol”</li>
+<li>typeof(function(){}): “function”</li>
+</ul>
+<h4 id="赋值运算符"><a href="#赋值运算符" class="headerlink" title="赋值运算符"></a>赋值运算符</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">let v, v0;</span><br><span class="line">v = v0 = 9.8 //链式赋值，先给v0赋值9.8，然后给v赋值9.8</span><br></pre></td></tr></table></figure>
+<h4 id="解构赋值"><a href="#解构赋值" class="headerlink" title="解构赋值"></a>解构赋值</h4><p>前文已写过</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/ES6/" rel="tag"># ES6</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/03/15/python装饰器/" rel="next" title="python装饰器">
+                <i class="fa fa-chevron-left"></i> python装饰器
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="大长腿鲁班">
+            
+              <p class="site-author-name" itemprop="name">大长腿鲁班</p>
+              <p class="site-description motion-element" itemprop="description">悠悠苍天，何薄于我 -诸葛</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">23</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">11</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">11</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/guo897654050" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://weibo.com/u/5021302462" target="_blank" title="微博">
+                      
+                        <i class="fa fa-fw fa-weibo"></i>微博</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#数据类型"><span class="nav-number">1.</span> <span class="nav-text">数据类型</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#字符串"><span class="nav-number">1.1.</span> <span class="nav-text">字符串</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#符号"><span class="nav-number">2.</span> <span class="nav-text">符号</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#null和undefined"><span class="nav-number">3.</span> <span class="nav-text">null和undefined</span></a></li></ol><li class="nav-item nav-level-3"><a class="nav-link" href="#对象"><span class="nav-number"></span> <span class="nav-text">对象</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#日期"><span class="nav-number">1.</span> <span class="nav-text">日期</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#映射和集合"><span class="nav-number">2.</span> <span class="nav-text">映射和集合</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#数据转化"><span class="nav-number">3.</span> <span class="nav-text">数据转化</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#转化为数字"><span class="nav-number">3.1.</span> <span class="nav-text">转化为数字</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#转化为字符串"><span class="nav-number">3.2.</span> <span class="nav-text">转化为字符串</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#真值和假值"><span class="nav-number">4.</span> <span class="nav-text">真值和假值</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#短路求值"><span class="nav-number">5.</span> <span class="nav-text">短路求值</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#算术运算符"><span class="nav-number">6.</span> <span class="nav-text">算术运算符</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#数字的比较"><span class="nav-number">7.</span> <span class="nav-text">数字的比较</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#类判断运算符"><span class="nav-number">8.</span> <span class="nav-text">类判断运算符</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#赋值运算符"><span class="nav-number">9.</span> <span class="nav-text">赋值运算符</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#解构赋值"><span class="nav-number">10.</span> <span class="nav-text">解构赋值</span></a></li></ol></li></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">大长腿鲁班</span>
+
+  
+</div>
+
+
+<div class="powered-by">
+<i class="fa fa-user-md"></i><span id="busuanzi_container_site_uv">
+  本站访客数:<span id="busuanzi_value_site_uv"></span>
+</span>
+</div>
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Gemini</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'kgXwARBSb6kIcni5deGNp1zl-gzGzoHsz',
+        appKey: 'yWBy1sXSK5yTTOI9YYw54UB5',
+        placeholder: '填写下你的心得吧',
+        avatar:'retro',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
