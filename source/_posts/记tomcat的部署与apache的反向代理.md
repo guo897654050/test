@@ -178,5 +178,5 @@ docker run -it -p 8080:8080 tomcat:company /bin/bash
 ```
 按下Ctrl+P+Q使容器在后台运行。再次进入
 ```
-docker exec -it tomcat:company /bin/bash
+docker exec -it tomcat:company /bin/bash 进入如果没启动在bin目录下./startup.sh
 ```

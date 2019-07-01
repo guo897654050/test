@@ -85,5 +85,5 @@ theme: next
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
   type: git
-  repo: guoxy@144.34.233.31:/var/repo/hexo_static.git
+  repo: guoxy@65.49.197.231:hexo.git
   branch: master

@@ -87,7 +87,7 @@
 <meta property="og:site_name" content="风居住的街道">
 <meta property="og:description" content="tomcat的部署首先，先说一下tomcat的部署，tomcat的部署的文件位于/conf/server.xml中，其中默认的端口为8080，一般来说http访问都是80端口，那么只需要把8080端口改成80端口即可。其次，更改为https部署，首选我们可以去阿里云申请免费的的ssl证书，那么在server.xml中配置1234567891011&amp;lt;Connector port=&amp;quot;4">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-12-27T14:56:08.810Z">
+<meta property="og:updated_time" content="2019-06-24T13:56:30.595Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="记tomcat的部署与apache的反向代理">
 <meta name="twitter:description" content="tomcat的部署首先，先说一下tomcat的部署，tomcat的部署的文件位于/conf/server.xml中，其中默认的端口为8080，一般来说http访问都是80端口，那么只需要把8080端口改成80端口即可。其次，更改为https部署，首选我们可以去阿里云申请免费的的ssl证书，那么在server.xml中配置1234567891011&amp;lt;Connector port=&amp;quot;4">
@@ -375,7 +375,7 @@
 <p>相应的文件都有，这里主要是java的jdk和tomcat的文件。执行<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker build -t tomcat:v1 .</span><br></pre></td></tr></table></figure></p>
 <p>这时候吧镜像上传到自己dockerhub，需要给自己的镜像打上tag<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker login #先登录</span><br><span class="line">docker tag tomcat:company guoxy/tomcat:company  #其中guoxy为自己的仓库名</span><br><span class="line">docker push guoxy/tomcat:company</span><br></pre></td></tr></table></figure></p>
 <p>此时镜像上传到自己的dockerhub。运行映射一下端口<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -it -p 8080:8080 tomcat:company /bin/bash</span><br></pre></td></tr></table></figure></p>
-<p>按下Ctrl+P+Q使容器在后台运行。再次进入<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker exec -it tomcat:company /bin/bash</span><br></pre></td></tr></table></figure></p>
+<p>按下Ctrl+P+Q使容器在后台运行。再次进入<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker exec -it tomcat:company /bin/bash 进入如果没启动在bin目录下./startup.sh</span><br></pre></td></tr></table></figure></p>
 
       
     </div>
@@ -500,7 +500,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">21</span>
+                  <span class="site-state-item-count">31</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -511,7 +511,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-count">13</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
@@ -522,7 +522,7 @@
               
               <div class="site-state-item site-state-tags">
                 
-                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-count">14</span>
                   <span class="site-state-item-name">标签</span>
                 
               </div>
