@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+<<<<<<< HEAD
     <loc>http://windystreet.net/2018/12/27/%E8%AE%B0tomcat%E7%9A%84%E9%83%A8%E7%BD%B2%E4%B8%8Eapache%E7%9A%84%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86/</loc>
     <lastmod>2019-06-24T13:56:30.595Z</lastmod>
   </url>  <url>
@@ -36,6 +37,16 @@
   </url>  <url>
     <loc>http://windystreet.net/2019/03/15/python%E8%A3%85%E9%A5%B0%E5%99%A8/</loc>
     <lastmod>2019-04-15T15:26:48.912Z</lastmod>
+=======
+    <loc>http://windystreet.net/2019/03/19/es6-1/</loc>
+    <lastmod>2019-03-19T15:37:47.345Z</lastmod>
+  </url>  <url>
+    <loc>http://windystreet.net/2019/03/15/python%E8%A3%85%E9%A5%B0%E5%99%A8/</loc>
+    <lastmod>2019-03-15T06:42:21.191Z</lastmod>
+  </url>  <url>
+    <loc>http://windystreet.net/2019/02/25/redis%E6%8C%81%E4%B9%85%E5%8C%96/</loc>
+    <lastmod>2019-03-02T03:07:54.915Z</lastmod>
+>>>>>>> 6fc97e452479f0b05c4711b1fa71f4c7f680ad93
   </url>  <url>
     <loc>http://windystreet.net/2019/02/25/redis%E4%BA%8B%E5%8A%A12/</loc>
     <lastmod>2019-03-02T02:59:39.578Z</lastmod>
